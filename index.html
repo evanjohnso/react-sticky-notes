@@ -6,6 +6,8 @@
         <script src="https://fb.me/react-dom-15.2.1.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.34/browser.js"></script>
         <link href="styles.css" rel="stylesheet" text="text/css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/fetch/1.0.0/fetch.js"></script>
+        <script src="https://npmcdn.com/react-draggable"></script>
     </head>
     <body>
         <div id="react-component"></div>
@@ -36,7 +38,9 @@
                         this.refs.newText.select()
                     }
                 },
-                
+                shouldComponentUpdate (nextProps, nextState) {
+                  return this.props.children !== nextProps.children || this.state !== nextState  
+                },
                 getRandomColor() {
                     var letters = '0123456789ABCDEF';
                     var color = '#';
@@ -74,9 +78,15 @@
                     )
                 },
                 render() {
-                    return (this.state.editing) ? this.renderForm() : this.renderDisplay()
-                }
+                    return ( <ReactDraggable>
+                        { (this.state.editing) ? this.renderForm() 
+                                                    : this.renderDisplay()} 
+                            </ReactDraggable>
+                    )}
             })
+
+
+
 
             let Board = React.createClass({
                 PropTypes: {
@@ -94,6 +104,20 @@
                         notes: []
                     }
                 },
+                componentWillMount() {
+                    if (this.props.count) {
+                        let url = `http://baconipsum.com/api/?type=all-meat&sentences=${this.props.count}`
+                        fetch(url)
+                                .then(results => results.json())
+                                .then(array => array[0])
+                                .then(text => text.split('. '))
+                                .then(array => array.forEach(                   
+                                    sentence => this.add(sentence)))
+                                .catch(function(err) {
+                                    console.log("Didn't connect to the API", err)
+                                }) 
+                    }
+                },
                 nextId() {
                     this.uniqueId = this.uniqueId || 0
                     return this.uniqueId++
@@ -103,9 +127,10 @@
                         ...this.state.notes,
                         {
                             id: this.nextId(),
-                            note: textToAdd
+                            text: textToAdd
                         }
                     ]
+                    console.log(this.state.notes)
                     this.setState({notes})
                 },
                 update(newText, id) {
@@ -117,7 +142,9 @@
                             text: newText
                         }
                     )
+                    
                     this.setState({notes})
+                    
                 },
                 remove(id) {
                     let notes = this.state.notes.filter(note => note.id !== id)
