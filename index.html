@@ -5,10 +5,13 @@
         <script src="https://fb.me/react-15.2.1.js"></script>
         <script src="https://fb.me/react-dom-15.2.1.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.34/browser.js"></script>
+        <link href="styles.css" rel="stylesheet" text="text/css">
     </head>
     <body>
         <div id="react-component"></div>
+    
         <script type="text/babel">
+
             let Note = React.createClass({
                 getInitialState() {
                     return { editing: false }
@@ -20,12 +23,32 @@
                     this.props.onChange(this.refs.newText.value, this.props.id)
                     this.setState({editing: false})
                 },
+                componentWillMount() {
+                    console.log('mounted')
+                    this.style = {
+                        right: this.randomBetween(0, window.innerWidth - 150, 'px'),
+                        top: this.randomBetween(0, window.innerHeight - 150, 'px'),
+                        background: this.getRandomColor()
+                    }
+                },
+                getRandomColor() {
+                    var letters = '0123456789ABCDEF';
+                    var color = '#';
+                    for (var i = 0; i < 6; i++) {
+                        color += letters[Math.floor(Math.random() * 16)];
+                    }
+                    return color;
+                },
+                randomBetween(x, y, s) {
+                    return (x + Math.ceil( Math.random() * (y-x))) + s
+                },
                 remove() {
                     this.props.onRemove(this.props.id)
                 },
                 renderForm() {
                     return (
-                        <div>
+                        <div className="note"
+                             style={this.style}>
                             <textarea ref="newText"></textarea>
                             <button onClick={this.save}>SAVE</button>
                         </div>
@@ -33,7 +56,8 @@
                 },
                 renderDisplay() {
                     return (
-                        <div>
+                        <div className="note"
+                             style={this.style}>
                             <p>{this.props.children}</p>
                             <span>
                                 <button onClick={this.edit}>EDIT</button>
@@ -46,6 +70,7 @@
                     return (this.state.editing) ? this.renderForm() : this.renderDisplay()
                 }
             })
+
             let Board = React.createClass({
                 PropTypes: {
                     const: function(props, propName) {
@@ -59,13 +84,22 @@
                 },
                 getInitialState() {
                     return {
-                        notes: [
-                            {id: 0, text: 'Call bob'},
-                            {id: 1, text: 'Email Sarah'},
-                            {id: 2, text: 'Eat lunch'},
-                            {id: 3, text: 'Finish proposal'}
-                        ]
+                        notes: []
                     }
+                },
+                nextId() {
+                    this.uniqueId = this.uniqueId || 0
+                    return this.uniqueId++
+                },
+                add(textToAdd) {
+                    let notes = [
+                        ...this.state.notes,
+                        {
+                            id: this.nextId(),
+                            note: textToAdd
+                        }
+                    ]
+                    this.setState({notes})
                 },
                 update(newText, id) {
                     let notes = this.state.notes.map(
@@ -84,15 +118,16 @@
                 },
                 eachNote(note) {
                     return (<Note key={note.id}
-                                 id={note.id}
-                                 onChange={this.update}
-                                 onRemove={this.remove} >
-                                 {note.text}
+                                  id={note.id}
+                                  onChange={this.update}
+                                  onRemove={this.remove} >
+                                  {note.text}
                             </Note>)
                 },
                 render() {
                     return (
                         <div>
+                            <button onClick={ this.add }>+</button>
                             {this.state.notes.map(this.eachNote)}
                         </div>
                     )
