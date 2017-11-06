@@ -24,13 +24,19 @@
                     this.setState({editing: false})
                 },
                 componentWillMount() {
-                    console.log('mounted')
                     this.style = {
                         right: this.randomBetween(0, window.innerWidth - 150, 'px'),
                         top: this.randomBetween(0, window.innerHeight - 150, 'px'),
                         background: this.getRandomColor()
                     }
                 },
+                componentDidUpdate () {
+                    if (this.state.editing) {
+                        this.refs.newText.focus()
+                        this.refs.newText.select()
+                    }
+                },
+                
                 getRandomColor() {
                     var letters = '0123456789ABCDEF';
                     var color = '#';
@@ -49,7 +55,8 @@
                     return (
                         <div className="note"
                              style={this.style}>
-                            <textarea ref="newText"></textarea>
+                            <textarea ref="newText"
+                                      defaultValue={this.props.children}></textarea>
                             <button onClick={this.save}>SAVE</button>
                         </div>
                     )
