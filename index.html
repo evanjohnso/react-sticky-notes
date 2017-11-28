@@ -2,8 +2,8 @@
 <html>
     <head>
         <title>Hello World!</title>
-        <script src="https://fb.me/react-15.2.1.js"></script>
-        <script src="https://fb.me/react-dom-15.2.1.js"></script>
+        <script src="https://fb.me/react-15.3.0.js"></script>
+        <script src="https://fb.me/react-dom-15.3.0.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.34/browser.js"></script>
         <link href="styles.css" rel="stylesheet" text="text/css">
         <script src="https://cdnjs.cloudflare.com/ajax/libs/fetch/1.0.0/fetch.js"></script>
@@ -17,13 +17,6 @@
             let Note = React.createClass({
                 getInitialState() {
                     return { editing: false }
-                },
-                edit() {
-                    this.setState({editing: true})
-                },
-                save() {
-                    this.props.onChange(this.refs.newText.value, this.props.id)
-                    this.setState({editing: false})
                 },
                 componentWillMount() {
                     this.style = {
@@ -54,6 +47,13 @@
                 },
                 remove() {
                     this.props.onRemove(this.props.id)
+                },
+                edit() {
+                    this.setState({editing: true})
+                },
+                save() {
+                    this.props.onChange(this.refs.newText.value, this.props.id)
+                    this.setState({editing: false})
                 },
                 renderForm() {
                     return (
@@ -106,6 +106,7 @@
                 },
                 componentWillMount() {
                     if (this.props.count) {
+                        console.log(this.props.count)
                         let url = `http://baconipsum.com/api/?type=all-meat&sentences=${this.props.count}`
                         fetch(url)
                                 .then(results => results.json())
@@ -123,6 +124,10 @@
                     return this.uniqueId++
                 },
                 add(textToAdd) {
+                    if (typeof textToAdd != "string") {
+                        textToAdd = "pickles"
+                    }
+                    console.log(textToAdd.toString())
                     let notes = [
                         ...this.state.notes,
                         {
@@ -130,7 +135,6 @@
                             text: textToAdd
                         }
                     ]
-                    console.log(this.state.notes)
                     this.setState({notes})
                 },
                 update(newText, id) {
